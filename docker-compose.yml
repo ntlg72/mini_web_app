@@ -1,0 +1,48 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: myflaskapp
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"
+
+  backend:
+    build:
+      context: ./app
+    restart: always
+    depends_on:
+      - db
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DB: myflaskapp
+      FLASK_ENV: development
+    networks:
+      - backnet
+      - frontnet
+    expose:
+      - 8000
+
+  proxy:
+    build: ./proxy
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - frontnet
+
+volumes:
+  db-data:
+
+networks:
+  backnet:
+  frontnet:
