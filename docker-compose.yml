@@ -10,6 +10,8 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "3306:3306"
+    networks:  # Agregar red para que se comunique con el backend
+      - backnet  # Misma red que el backend
 
   backend:
     build:
@@ -24,7 +26,7 @@ services:
       MYSQL_DB: myflaskapp
       FLASK_ENV: development
     networks:
-      - backnet
+      - backnet 
       - frontnet
     expose:
       - 8000
@@ -38,11 +40,11 @@ services:
       - "80:80"
       - "443:443"
     networks:
-      - frontnet
+      - frontnet  # Correcto
 
 volumes:
   db-data:
 
 networks:
-  backnet:
-  frontnet:
+  backnet:  # Red compartida entre db y backend
+  frontnet:  # Red para proxy y backend
